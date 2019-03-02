@@ -87,7 +87,7 @@ saver = tf.train.Saver()
 
 tyf.initialize_params(sess,model)
 tyf.train(sess,model,train_generator,val_generator, epochs=30, 
-          callbacks=[tyf.Save(sess,saver,"/scratch/checkpoints_vlad/model_CNN.ckpt"), 
+          callbacks=[tyf.Save(sess,saver,"/scratch/checkpoints_vlad/incongr/model_CNN.ckpt"), 
                      tyf.StopWhenValidationGetsWorse(3)])
 
 
