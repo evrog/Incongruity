@@ -26,12 +26,12 @@ def words_to_ints(ws, vocab):
     return xs, vocab
 
 data = {'train':{},'val':{},'test':{}}
-data['train']['pos'] = open('data/i_train.txt').readlines()
-data['train']['neg'] = open('data/ni_train.txt').readlines()
-data['val']['pos'] = open('data/i_val.txt').readlines()
-data['val']['neg'] = open('data/ni_val.txt').readlines()
-data['test']['pos'] = open('data/i_test.txt').readlines()
-data['test']['neg'] = open('data/ni_test.txt').readlines()
+data['train']['pos'] = open('data/m_train.txt').readlines()  + open('data/p_train.txt').readlines()   + open('data/i_train.txt').readlines() 
+data['train']['neg'] = open('data/nm_train.txt').readlines() + open('data/np_train.txt').readlines()  + open('data/ni_train.txt').readlines()
+data['val']['pos'] =   open('data/m_val.txt').readlines()    + open('data/p_val.txt').readlines()     + open('data/i_val.txt').readlines()   
+data['val']['neg'] =   open('data/nm_val.txt').readlines()   + open('data/np_val.txt').readlines()    + open('data/ni_val.txt').readlines()  
+data['test']['pos'] =  open('data/m_test.txt').readlines()
+data['test']['neg'] =  open('data/nm_test.txt').readlines()
 
 vocab = {"@@@@@":0}
 def data_to_array(dt,vocab,char=False):
@@ -41,6 +41,8 @@ def data_to_array(dt,vocab,char=False):
         words = tknzr.tokenize(l.strip())
         if char:
             words = list(" ".join(words).lower())
+        else:
+            words = " ".join(words).lower().split(" ")
         ws,vocab = words_to_ints(words, vocab)
         ys.append(1)
         xs.append(ws)
@@ -48,6 +50,8 @@ def data_to_array(dt,vocab,char=False):
         words = tknzr.tokenize(l.strip())
         if char:
             words = list(" ".join(words).lower())
+        else:
+            words = " ".join(words).lower().split(" ")
         ws,vocab = words_to_ints(words, vocab)
         ys.append(0)
         xs.append(ws)
@@ -60,9 +64,10 @@ test_x, test_y, vocab = data_to_array('test',vocab)
 maxlen = max([len(max(train_x, key=len)),len(max(val_x, key=len)),len(max(test_x, key=len))])
 print("Max. length:", maxlen)
 print("Vocab. size", len(vocab))
-train_x = pad_sequences(train_x, value=0, maxlen=120)
-val_x = pad_sequences(val_x, value=0, maxlen=120)
-test_x = pad_sequences(test_x, value=0, maxlen=120)
+maxlen=164 #60
+train_x = pad_sequences(train_x, value=0, maxlen=maxlen)
+val_x = pad_sequences(val_x, value=0, maxlen=maxlen)
+test_x = pad_sequences(test_x, value=0, maxlen=maxlen)
 train_y = np.array(train_y, dtype=np.int32)
 val_y = np.array(val_y, dtype=np.int32)
 test_y = np.array(test_y, dtype=np.int32)
