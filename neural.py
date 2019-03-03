@@ -6,77 +6,23 @@ import numpy as np
 from model import mkModel
 import os
 import itertools
-import random
 
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-
-from nltk.tokenize import TweetTokenizer
-tknzr = TweetTokenizer()
-
-from tqdm import tqdm
 import pickle
-
-def words_to_ints(ws, vocab):
-    maxvalue = max(vocab.values())
-    for w in ws:
-        if w not in vocab:
-            maxvalue += 1
-            vocab[w] = maxvalue
-    xs = [vocab[x] for x in ws]
-    return xs, vocab
-
-data = {'train':{},'val':{},'test':{}}
-data['train']['pos'] = open('data/m_train.txt').readlines()  + open('data/p_train.txt').readlines()   + open('data/i_train.txt').readlines() 
-data['train']['neg'] = open('data/nm_train.txt').readlines() + open('data/np_train.txt').readlines()  + open('data/ni_train.txt').readlines()
-data['val']['pos'] =   open('data/m_val.txt').readlines()    + open('data/p_val.txt').readlines()     + open('data/i_val.txt').readlines()   
-data['val']['neg'] =   open('data/nm_val.txt').readlines()   + open('data/np_val.txt').readlines()    + open('data/ni_val.txt').readlines()  
-data['test']['pos'] =  open('data/m_test.txt').readlines()
-data['test']['neg'] =  open('data/nm_test.txt').readlines()
-
-vocab = {"@@@@@":0}
-def data_to_array(dt,vocab,char=False):
-    ys = []
-    xs = []
-    for l in data[dt]['pos']:
-        words = tknzr.tokenize(l.strip())
-        if char:
-            words = list(" ".join(words).lower())
-        else:
-            words = " ".join(words).lower().split(" ")
-        ws,vocab = words_to_ints(words, vocab)
-        ys.append(1)
-        xs.append(ws)
-    for l in data[dt]['neg']:
-        words = tknzr.tokenize(l.strip())
-        if char:
-            words = list(" ".join(words).lower())
-        else:
-            words = " ".join(words).lower().split(" ")
-        ws,vocab = words_to_ints(words, vocab)
-        ys.append(0)
-        xs.append(ws)
-    return xs,ys,vocab
-
-train_x, train_y,vocab = data_to_array('train',vocab)
-val_x, val_y, vocab = data_to_array('val',vocab)
-test_x, test_y, vocab = data_to_array('test',vocab)
-
-maxlen = max([len(max(train_x, key=len)),len(max(val_x, key=len)),len(max(test_x, key=len))])
-print("Max. length:", maxlen)
-print("Vocab. size", len(vocab))
-maxlen=164 #60
-train_x = pad_sequences(train_x, value=0, maxlen=maxlen)
-val_x = pad_sequences(val_x, value=0, maxlen=maxlen)
-test_x = pad_sequences(test_x, value=0, maxlen=maxlen)
-train_y = np.array(train_y, dtype=np.int32)
-val_y = np.array(val_y, dtype=np.int32)
-test_y = np.array(test_y, dtype=np.int32)
 
 # print(val_x.shape)
 # print(val_y.shape)
 # print(len(vocab.items()))
 # print(train_x)
 # print(train_y)
+
+data = pickle.load(open('data/dump/all.pickle', 'rb'))
+train_x = np.concatenate((data['m']['train_x'] ,  data['p']['train_x'],data['i']['train_x'] ))
+val_x =   np.concatenate((data['m']['val_x']   ,  data['p']['val_x']  ,data['i']['val_x']  ))
+train_y = np.concatenate((data['m']['train_y'] ,  data['p']['train_y'],data['i']['train_y']))
+val_y =   np.concatenate((data['m']['val_y']   ,  data['p']['val_y']  ,data['i']['val_y']  ))
+
+test_x =  data['p']['test_x']
+test_y =  data['p']['test_y']
 
 
 def train_generator(batch_size):
