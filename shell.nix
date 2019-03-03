@@ -16,7 +16,7 @@ let hp = haskellPackages.override{
         pretty-compact = self.callPackage ./pretty-compact.nix {};
         typedflow = self.callPackage ./typedflow.nix {};};};
     ghc = hp.ghcWithPackages (ps: with ps; ([ typedflow cabal-install QuickCheck ]));
-    py = (pkgs.python36.withPackages (ps: [ps.tensorflowWithoutCuda
+    py = (pkgs.python36.withPackages (ps: [ps.tensorflowWithCuda
        	 			     	   ps.tqdm
 					   ps.scikitlearn
 					   ps.pandas
