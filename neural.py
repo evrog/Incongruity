@@ -16,10 +16,15 @@ import pickle
 # print(train_y)
 
 data = pickle.load(open('data/dump/all.pickle', 'rb'))
-train_x = np.concatenate((data['m']['train_x'] ,  data['p']['train_x'],data['i']['train_x'] ))
-val_x =   np.concatenate((data['m']['val_x']   ,  data['p']['val_x']  ,data['i']['val_x']  ))
-train_y = np.concatenate((data['m']['train_y'] ,  data['p']['train_y'],data['i']['train_y']))
-val_y =   np.concatenate((data['m']['val_y']   ,  data['p']['val_y']  ,data['i']['val_y']  ))
+vocab = pickle.load(open('data/dump/vocab.pickle','rb'))
+v = {}
+for x,y in vocab.items():
+    v[y] = x
+
+train_x = np.concatenate((data['p']['train_x'],data['i']['train_x'] ))
+val_x =   np.concatenate((data['p']['val_x']  ,data['i']['val_x']  ))
+train_y = np.concatenate((data['p']['train_y'],data['i']['train_y']))
+val_y =   np.concatenate((data['p']['val_y']  ,data['i']['val_y']  ))
 
 test_x =  data['p']['test_x']
 test_y =  data['p']['test_y']
@@ -58,6 +63,19 @@ def metrics(cm):
 # comment out if you don't have CUDA
 tyf.cuda_use_one_free_device()
 
+def outcome(y, y_):
+    if y_:
+        if y_ == y: 
+            return 'tp'
+        else:
+            return 'fp'
+    else:
+        if y_ == y:
+            return 'tn'
+        else:
+            return 'fn'
+
+
 def main(mode,name):
     if mode == 'train':
         model = mkModel(tf.train.AdamOptimizer(1e-4))
@@ -83,7 +101,20 @@ def main(mode,name):
             print('Confusion Matrix: \n', tf.Tensor.eval(tfcm,feed_dict=None, session=None))
             print(metrics(cm))
             print("/".join(["{:.3f}".format(v) for v in metrics(cm).values()]))
-
+        texts = []
+        for xi,yi,yi_ in zip(test_x,gold_y,pred_y):
+            start = np.nonzero(xi)[0][0]
+            o = outcome(yi, yi_)
+            s = " ".join([v[x] for x in xi[start:]])
+            texts.append((o,s))
+        tp = [d[1] for d in texts if d[0] == 'tp']
+        tn = [d[1] for d in texts if d[0] == 'tn']
+        fp = [d[1] for d in texts if d[0] == 'fp']
+        fn = [d[1] for d in texts if d[0] == 'fn']
+        open("error-analysis/{}/tp.txt".format(name), "w").writelines("%s\n" % l for l in tp)
+        open("error-analysis/{}/tn.txt".format(name), "w").writelines("%s\n" % l for l in tn)
+        open("error-analysis/{}/fp.txt".format(name), "w").writelines("%s\n" % l for l in fp)
+        open("error-analysis/{}/fn.txt".format(name), "w").writelines("%s\n" % l for l in fn)
 
 if __name__ == '__main__':
     main(sys.argv[1], sys.argv[2])
