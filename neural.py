@@ -21,10 +21,10 @@ v = {}
 for x,y in vocab.items():
     v[y] = x
 
-train_x = np.concatenate((data['p']['train_x'],data['i']['train_x'] ))
-val_x =   np.concatenate((data['p']['val_x']  ,data['i']['val_x']  ))
-train_y = np.concatenate((data['p']['train_y'],data['i']['train_y']))
-val_y =   np.concatenate((data['p']['val_y']  ,data['i']['val_y']  ))
+train_x = np.concatenate((data['p']['train_x'],data['i']['train_x'],data['m']['train_x'] ))
+val_x =   np.concatenate((data['p']['val_x']  ,data['i']['val_x']  ,data['m']['val_x']  ))
+train_y = np.concatenate((data['p']['train_y'],data['i']['train_y'],data['m']['train_y']))
+val_y =   np.concatenate((data['p']['val_y']  ,data['i']['val_y']  ,data['m']['val_y']  ))
 
 test_x =  data['p']['test_x']
 test_y =  data['p']['test_y']
